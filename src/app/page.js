@@ -1,7 +1,7 @@
 'use client';
 import React, { useRef, useState, useEffect } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import MapComponent from '@/components/Map';
+import { Card, CardContent } from '../components/ui/card';
+import MapComponent from '../components/Map';
 import { 
   MapPin, 
   Star, 

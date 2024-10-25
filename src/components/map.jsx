@@ -19,7 +19,7 @@ function MapComponent({ restaurants, userLocation }) {
   };
 
   const { isLoaded } = useLoadScript({
-    googleMapsApiKey: 'AIzaSyBIv9zZ-ZAh-Pz6pVuGPYTyBb0vbsBYoQ4',
+    googleMapsApiKey: 'MON API KEY',
     libraries: libraries
   });
 
