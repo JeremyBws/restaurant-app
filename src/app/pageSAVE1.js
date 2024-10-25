@@ -38,6 +38,69 @@ const restaurantsData = [
     { id: 20, name: "Le Bistrot des Vosges", image: "/api/placeholder/400/250", address: "34 Rue des Vosges, 75011 Paris", rating: 4.6, cuisine: "Français", price: "€€", openSpots: 5, distance: 2.1, lat: 48.8552, lng: 2.3666 }
 ];
 
+const RestaurantCard = ({ restaurant, toggleFavorite, isFavorite }) => {
+  return (
+    <Card>
+      <CardContent>
+        <img src={restaurant.image} alt={restaurant.name} />
+        <h3>{restaurant.name}</h3>
+        <p>{restaurant.address}</p>
+        <p>Cuisine: {restaurant.cuisine}</p>
+        <p>Prix: {restaurant.price}</p>
+        <p>Évaluation: {restaurant.rating}</p>
+        <button onClick={() => toggleFavorite(restaurant.id)}>
+          <Heart color={isFavorite ? "red" : "gray"} />
+        </button>
+      </CardContent>
+    </Card>
+  );
+};
+
+const RestaurantList = () => {
+  const [favorites, setFavorites] = useState([]);
+
+  useEffect(() => {
+    // Charger les favoris depuis le localStorage
+    const savedFavorites = JSON.parse(localStorage.getItem('favorites')) || [];
+    setFavorites(savedFavorites);
+  }, []);
+
+  useEffect(() => {
+    // Sauvegarder les favoris dans le localStorage
+    localStorage.setItem('favorites', JSON.stringify(favorites));
+  }, [favorites]);
+
+  const toggleFavorite = (restaurantId) => {
+    setFavorites((prevFavorites) => {
+      if (prevFavorites.includes(restaurantId)) {
+        return prevFavorites.filter(id => id !== restaurantId); // Retirer des favoris
+      } else {
+        return [...prevFavorites, restaurantId]; // Ajouter aux favoris
+      }
+    });
+  };
+
+  return (
+    <div>
+      {restaurantsData.map(restaurant => {
+        const isFavorite = favorites.includes(restaurant.id);
+        return (
+          <RestaurantCard
+            key={restaurant.id}
+            restaurant={restaurant}
+            toggleFavorite={toggleFavorite} // Assurez-vous que cette ligne est présente
+            isFavorite={isFavorite}
+          />
+        );
+      })}
+      <MapComponent restaurants={restaurantsData} />
+    </div>
+  );
+};
+
+export {RestaurantList};
+
+
 
 
 function FilterBar({ activeFilter, handleFilter }) {
@@ -67,7 +130,7 @@ return (
     <div className="p-2">
 	
       <div
-        className={'flex gap-2 pb-2 md:pb-4 overflow-x-auto'}
+        className={`flex gap-2 pb-2 md:pb-4 overflow-x-auto`}
         ref={filterContainerRef}
         style={{ minWidth: 'max-content' }} // Ensures the container can grow with content
       >
@@ -169,7 +232,15 @@ return (
 }
 
 
+
+
+
 export default function Home() {
+	
+	const [favorites, setFavorites] = useState(() => {
+		const savedFavorites = JSON.parse(localStorage.getItem('favorites'));
+		return savedFavorites || []; // Si c'est null ou undefined, renvoyez un tableau vide
+	});
 	const [userLocation, setUserLocation] = useState(null);
 	const [locationStatus, setLocationStatus] = useState('idle'); // 'idle', 'loading', 'success', 'error'
 	const [isSearchExpanded, setIsSearchExpanded] = useState(false);
@@ -179,17 +250,17 @@ export default function Home() {
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
 	const [searchTerm, setSearchTerm] = useState('');
 	const handleSearch = (value) => {
-		setSearchTerm(value);
-	if (!value) {
-		setFilteredRestaurants(restaurantsData);
-    return;
-  }
+			setSearchTerm(value);
+			if (!value) {
+				setFilteredRestaurants(restaurantsData);
+				return;
+				}
   
-	const searchResults = restaurantsData.filter(restaurant => 
-		restaurant.name.toLowerCase().includes(value.toLowerCase()) ||
-		restaurant.cuisine.toLowerCase().includes(value.toLowerCase()) ||
-		restaurant.address.toLowerCase().includes(value.toLowerCase())
-  );
+		const searchResults = restaurantsData.filter(restaurant => 
+			restaurant.name.toLowerCase().includes(value.toLowerCase()) ||
+			restaurant.cuisine.toLowerCase().includes(value.toLowerCase()) ||
+			restaurant.address.toLowerCase().includes(value.toLowerCase())
+		);
   
   setFilteredRestaurants(searchResults);
 };
@@ -255,6 +326,10 @@ const handleLocationRequest = () => {
     }
   );
 };
+
+useEffect(() => {
+  localStorage.setItem('favorites', JSON.stringify(favorites));
+}, [favorites]);
 
 const calculateDistance = (lat1, lon1, restaurant) => {
   // Simulation de distance - à remplacer par une vraie formule si vous avez les coordonnées
@@ -407,7 +482,7 @@ const calculateDistance = (lat1, lon1, restaurant) => {
      <div className="bg-white border-b px-4 py-2 flex justify-between items-center sticky top-[60px] z-40">
        <div className="text-sm text-gray-600">{filteredRestaurants.length} restaurants trouvés autour de vous</div>
        <div className="flex gap-2">
-        <button 
+         <button 
            onClick={() => setShowMap(false)}
            className={`px-4 py-2 rounded-lg text-sm font-medium ${
              !showMap ? 'bg-emerald-100 text-emerald-600' : 'hover:bg-gray-100 text-gray-600'
@@ -437,12 +512,23 @@ const calculateDistance = (lat1, lon1, restaurant) => {
   </div>
        ) : (
          <div className="max-w-xl mx-auto p-4 space-y-4 pb-20">
-           {filteredRestaurants.map(restaurant => (
-             <RestaurantCard
-               key={restaurant.id}
-               {...restaurant}
-             />
-           ))}
+          {filteredRestaurants.map(restaurant => (
+  <RestaurantCard
+    key={restaurant.id}
+    name={restaurant.name}
+    image={restaurant.image}
+    address={restaurant.address}
+    rating={restaurant.rating}
+    cuisine={restaurant.cuisine}
+    price={restaurant.price}
+    openSpots={restaurant.openSpots}
+    distance={restaurant.distance}
+    isFavorite={favorites.includes(restaurant.id)} // Ajout de l'état des favoris
+    toggleFavorite={toggleFavorite} // Passage de la fonction de gestion des favoris
+  />
+))}
+
+
          </div>
        )}
      </main>
@@ -471,44 +557,3 @@ const calculateDistance = (lat1, lon1, restaurant) => {
    </div>
  );
 }
-
-const RestaurantCard = ({ name, image, address, rating, cuisine, price, openSpots, distance }) => {
-  return (
-    <Card className="overflow-hidden">
-      <div className="relative h-48">
-        <img src={image} alt={name} className="w-full h-full object-cover" />
-        <button className="absolute top-3 right-3 p-2 bg-white rounded-full shadow">
-          <Heart size={20} className="text-gray-600" />
-        </button>
-<div className="absolute top-3 left-3 bg-white px-3 py-2 rounded-lg flex items-center shadow-md hover:scale-105 transition-transform">
-  <Star className="text-yellow-500 w-5 h-5" fill="#eab308" />
-  <span className="ml-1.5 font-semibold text-gray-400">{rating.toFixed(1)}</span>
-</div>
-      </div>
-      <CardContent className="p-4">
-        <div className="flex justify-between items-start">
-          <h3 className="font-semibold text-lg text-gray-900">{name}</h3>
-          <span className="text-sm text-gray-600">
-
-  {distance < 1 
-    ? `${(distance * 1000).toFixed(0)}m` 
-    : `${distance.toFixed(1)}km`}
-</span>
-        </div>
-        <p className="text-gray-600 text-sm mt-1">{address}</p>
-        <div className="mt-2 flex items-center gap-3 text-sm text-gray-700">
-          <span>{cuisine}</span>
-          <span>•</span>
-          <span>{price}</span>
-        </div>
-        <div className="mt-2 flex items-center text-sm font-medium text-emerald-600">
-          <Users className="w-4 h-4 mr-1" />
-          <span>{openSpots} places disponibles</span>
-        </div>
-        <button className="mt-3 w-full py-3 bg-emerald-600 text-white rounded-lg font-medium hover:bg-emerald-700">
-          Réserver
-        </button>
-      </CardContent>
-    </Card>
-  );
-};

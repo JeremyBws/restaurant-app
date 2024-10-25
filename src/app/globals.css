@@ -19,3 +19,41 @@ body {
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
 }
+/* Style pour le scroll horizontal */
+.overflow-x-auto {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Pour cacher la scrollbar sur desktop */
+@media (min-width: 688px) {
+  .overflow-x-auto {
+    scrollbar-width: thin; /* Change to thin for visibility */
+    -ms-overflow-style: auto; /* Allow scrollbar to show */
+  }
+  .overflow-x-auto::-webkit-scrollbar {
+    display: block; /* Show scrollbar */
+    height: 6px; /* Set height */
+  }
+}
+
+/* Style de la scrollbar sur petit ecran */
+@media (max-width: 689px) {
+  .overflow-x-auto::-webkit-scrollbar {
+    height: 6px;
+  }
+  
+  .overflow-x-auto::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+  }
+  
+  .overflow-x-auto::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 3px;
+  }
+  
+  .overflow-x-auto::-webkit-scrollbar-thumb:hover {
+    background: #555;
+  }
+}
