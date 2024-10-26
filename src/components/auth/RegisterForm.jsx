@@ -43,7 +43,7 @@ const RegisterForm = ({ onClose, onSwitchToLogin }) => {
       await register(formData.email, formData.password, formData.name);
       if (onClose) onClose();
     } catch (err) {
-      setError('Erreur lors de l\'inscription. Veuillez réessayer.');
+      setError('Erreur lors de l&apos;inscription. Veuillez réessayer.');
     }
     
     setLoading(false);
@@ -140,9 +140,9 @@ const RegisterForm = ({ onClose, onSwitchToLogin }) => {
             required
           />
           <label htmlFor="terms" className="ml-2 text-sm text-gray-600">
-            J'accepte les{' '}
+            J&apos;accepte les{' '}
             <a href="#" className="text-emerald-600 hover:underline">
-              conditions d'utilisation
+              conditions d&apos;utilisation
             </a>
             {' '}et la{' '}
             <a href="#" className="text-emerald-600 hover:underline">
@@ -160,7 +160,7 @@ const RegisterForm = ({ onClose, onSwitchToLogin }) => {
               : 'bg-emerald-600 hover:bg-emerald-700'
             }`}
         >
-          {loading ? 'Inscription...' : 'S\'inscrire'}
+          {loading ? 'Inscription...' : 'S&apos;inscrire'}
         </button>
       </form>
 

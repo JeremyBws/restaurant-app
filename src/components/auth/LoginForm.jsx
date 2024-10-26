@@ -130,7 +130,7 @@ const LoginForm = ({ onClose }) => {
           onClick={() => {}} // À implémenter : basculer vers l'inscription
           className="text-emerald-600 hover:text-emerald-700 font-medium"
         >
-          S'inscrire
+          S&apos;inscrire
         </button>
       </p>
     </div>

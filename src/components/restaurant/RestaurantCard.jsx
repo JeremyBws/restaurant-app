@@ -3,6 +3,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Star, Users, Heart } from 'lucide-react';
 import { useFavorites } from '@/contexts/FavoritesContext';
 import { useAuth } from '@/contexts/AuthContext';
+import Image from 'next/image'; 
 
 const RestaurantCard = ({ id, name, image, address, rating, cuisine, price, openSpots, distance }) => {
   const { isFavorite, toggleFavorite } = useFavorites();
@@ -20,7 +21,7 @@ const RestaurantCard = ({ id, name, image, address, rating, cuisine, price, open
   return (
     <Card className="overflow-hidden relative group">
       <div className="relative h-48">
-        <img src={image} alt={name} className="w-full h-full object-cover" />
+        <image src={image} alt={name} className="w-full h-full object-cover" />
         <button 
           onClick={handleFavoriteClick}
           className="absolute top-3 right-3 p-2 bg-white rounded-full shadow-lg transform transition-transform hover:scale-110 active:scale-95"

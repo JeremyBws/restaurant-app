@@ -1,6 +1,8 @@
 'use client';
 import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import Link from 'next/link';
+import Image from 'next/image';
 import { 
   MapPin, 
   Star, 
@@ -30,11 +32,13 @@ const { user, logout, openAuthModal } = useAuth();
           >
             <AlignJustify size={24} />
           </button>
-          
-    <a href="/" className="text-xl font-bold text-emerald-600">
-      <span className="bg-emerald-600 text-white px-3 py-1 rounded">ABCD</span>
-    </a>	
 
+     <Link href="/">
+
+      <span className="bg-emerald-600 text-xl font-bold text-white px-3 py-1 rounded">ABCD</span>
+
+	</Link>
+	
           <div className="flex items-center gap-2">
             <button className="p-2 hover:bg-gray-100 rounded-lg">
               <Search size={24} />
@@ -75,7 +79,7 @@ const { user, logout, openAuthModal } = useAuth();
   <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg mb-4">
     <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center">
       {user ? (
-        <img 
+        <image 
           src={user.avatar || '/placeholder-avatar.png'} 
           alt={user.name}
           className="w-full h-full rounded-full object-cover"
@@ -131,7 +135,7 @@ const { user, logout, openAuthModal } = useAuth();
       <>
         <a href="/profil" className="flex items-center gap-3 p-3 hover:bg-gray-50 rounded-lg">
           <Settings size={20} className="text-gray-500" />
-          <span className="text-gray-700 font-medium">Paramètres</span>
+          <span className="text-gray-700 font-medium">Profil</span>
         </a>
         <button 
           onClick={logout}

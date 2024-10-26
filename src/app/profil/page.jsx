@@ -1,4 +1,5 @@
 'use client';
+import Image from 'next/image';
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { 
@@ -43,7 +44,7 @@ export default function ProfilePage() {
         <div className="flex items-center gap-4">
           <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center">
             {user.avatar ? (
-              <img 
+              <image 
                 src={user.avatar} 
                 alt={user.name} 
                 className="w-full h-full rounded-full object-cover"
