@@ -34,9 +34,9 @@ const RestaurantCard = ({ id, name, image, address, rating, cuisine, price, open
             } transition-colors`} 
           />
         </button>
-        <div className="absolute top-3 left-3 bg-white px-3 py-2 rounded-lg flex items-center shadow-md">
-          <Star className="text-yellow-500 w-5 h-5" fill="#eab308" />
-          <span className="ml-1.5 font-semibold text-gray-800">{rating.toFixed(1)}</span>
+<div className="absolute top-3 left-3 bg-white px-3 py-2 rounded-lg flex items-center shadow-md hover:scale-105 transition-transform">
+  <Star className="text-yellow-500 w-5 h-5" fill="#eab308" />
+  <span className="ml-1.5 font-semibold text-gray-400">{rating.toFixed(1)}</span>
         </div>
       </div>
       <CardContent className="p-4">
