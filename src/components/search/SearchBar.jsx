@@ -113,7 +113,7 @@ const SearchBar = () => {
             {/* Pas de résultats */}
             {!isLoading && searchTerm && suggestions.every(group => group.items.length === 0) && (
               <div className="p-4 text-center text-gray-500">
-                Aucun résultat pour "{searchTerm}"
+                Aucun résultat pour &quot;{searchTerm}&quot;
               </div>
             )}
 
