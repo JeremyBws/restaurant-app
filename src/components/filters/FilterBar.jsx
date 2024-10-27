@@ -1,189 +1,139 @@
-'use client';
-import { ChevronDown, X } from 'lucide-react';
-import React, { useState, useRef, useEffect, useCallback } from 'react';
 
-const FilterBar = ({ onFilterChange }) => {
-  const [activeFilter, setActiveFilter] = useState('all');
-  const [activeFilters, setActiveFilters] = useState([]);
+  import React, { useState } from 'react';
+import { SlidersHorizontal, ChevronDown, X } from 'lucide-react';
+import useFiltersStore from '@/store/filters';
 
-  const cuisineOptions = [
-    { value: 'Français', label: 'Français' },
-    { value: 'Japonais', label: 'Japonais' },
-    { value: 'Italien', label: 'Italien' },
-    { value: 'Chinois', label: 'Chinois' },
-    { value: 'Indien', label: 'Indien' },
-    { value: 'Mexicain', label: 'Mexicain' },
-    { value: 'Bistrot', label: 'Bistrot' },
-    { value: 'Steakhouse', label: 'Steakhouse' },
-    { value: 'Provençal', label: 'Provençal' },
-    { value: 'Vietnamien', label: 'Vietnamien' },
-    { value: 'Cambodgien', label: 'Cambodgien' },
-    { value: 'Pâtisserie', label: 'Pâtisserie' }
-  ];
+const FilterBar = ({ onFiltersChange }) => {
+  const [showFilters, setShowFilters] = useState(false);
+  const { activeFilters, setFilter, resetFilters } = useFiltersStore();
 
-  const priceOptions = [
-    { value: '€', label: '€ - Économique' },
-    { value: '€€', label: '€€ - Modéré' },
-    { value: '€€€', label: '€€€ - Élevé' }
-  ];
+  const filters = {
+    main: [
+      { id: 'all', label: 'Tous' },
+      { id: 'proche', label: 'À proximité' },
+      { id: 'populaire', label: 'Les plus populaires' }
+    ],
+    cuisine: [
+      { id: 'Français', label: 'Français' },
+    { id: 'Japonais', label: 'Japonais' },
+    { id: 'Italien', label: 'Italien' },
+    { id: 'Chinois', label: 'Chinois' },
+    { id: 'Indien', label: 'Indien' },
+    { id: 'Mexicain', label: 'Mexicain' },
+    { id: 'Bistrot', label: 'Bistrot' },
+    { id: 'Steakhouse', label: 'Steakhouse' },
+    { id: 'Provençal', label: 'Provençal' },
+    { id: 'Vietnamien', label: 'Vietnamien' },
+    { id: 'Cambodgien', label: 'Cambodgien' },
+    { id: 'Pâtisserie', label: 'Pâtisserie' }
+    ],
+    price: [
+      { id: '€', label: 'Économique' },
+      { id: '€€', label: 'Modéré' },
+      { id: '€€€', label: 'Haut de gamme' }
+    ]
+  };
 
-  const sortOptions = [
-    { value: 'distance', label: 'Distance' },
-    { value: 'rating', label: 'Meilleures notes' },
-    { value: 'price-asc', label: 'Prix croissant' },
-    { value: 'price-desc', label: 'Prix décroissant' }
-  ];
+  // Compte le nombre de filtres actifs (excluant 'all' du main)
+  const activeFiltersCount = Object.values(activeFilters)
+    .filter(value => value && value !== 'all').length;
 
-  const handleMainFilterClick = useCallback((filter) => {
-    setActiveFilter(filter);
-    onFilterChange('main', filter);
-  }, [onFilterChange]);
+  const handleFilterClick = (type, value) => {
+    setFilter(type, value);
+    onFiltersChange?.(type, value);
+  };
 
-  const handleFilterChange = useCallback((type, value, label) => {
-    setActiveFilters(prev => {
-      const updatedFilters = prev.filter(f => f.type !== type);
-      if (value !== null) {
-        return [...updatedFilters, { type, value, label }];
-      }
-      return updatedFilters;
-    });
-    onFilterChange(type, value);
-  }, [onFilterChange]);
+  const handleResetFilters = () => {
+    resetFilters();
+    onFiltersChange?.('reset', null);
+  };
 
+  // Reste du JSX identique, mais en utilisant handleFilterClick et handleResetFilters
   return (
-    <div className="bg-white border-b shadow-sm">
-      {/* Filtres principaux */}
-      <div className="px-4 py-3">
-        <div className="flex items-center gap-3 overflow-x-auto scrollbar-hide pb-2">
-          {['all', 'proche', 'populaire'].map(filter => (
-            <button 
-              key={filter}
-              className={`flex-none px-4 py-2 rounded-full text-sm font-medium transition-all
-                ${activeFilter === filter 
-                  ? 'bg-emerald-600 text-white shadow-md' 
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
-              onClick={() => handleMainFilterClick(filter)}
-            >
-              {filter === 'all' ? 'Tout voir' : filter === 'proche' ? 'À proximité' : 'Populaires'}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Filtres secondaires */}
-      <div className="relative">
-        <div className="px-4 py-2 border-t flex items-center gap-3 overflow-x-auto scrollbar-hide">
-          <div className="flex space-x-2 min-w-max">
-            <FilterDropdown 
-              label="Cuisine"
-              options={cuisineOptions}
-              value={activeFilters.find(f => f.type === 'cuisine')?.value}
-              onChange={(value, label) => handleFilterChange('cuisine', value, label)}
-            />
-            <FilterDropdown 
-              label="Prix"
-              options={priceOptions}
-              value={activeFilters.find(f => f.type === 'price')?.value}
-              onChange={(value, label) => handleFilterChange('price', value, label)}
-            />
-            <FilterDropdown 
-              label="Trier par"
-              options={sortOptions}
-              value={activeFilters.find(f => f.type === 'sort')?.value}
-              onChange={(value, label) => handleFilterChange('sort', value, label)}
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Filtres actifs */}
-      {activeFilters.length > 0 && (
-        <div className="px-4 py-2 border-t flex gap-2 overflow-x-auto scrollbar-hide">
-          {activeFilters.map(filter => (
+    <div className="bg-white rounded-lg shadow-sm">
+      {/* Filtres principaux toujours visibles */}
+      <div className="flex items-center justify-between p-4 border-b">
+        <div className="flex gap-2">
+          {filters.main.map(filter => (
             <button
-              key={filter.type}
-              className="flex items-center gap-1 px-3 py-1.5 bg-emerald-50 text-emerald-600 
-                rounded-full text-sm font-medium group hover:bg-emerald-100 transition-colors"
-              onClick={() => handleFilterChange(filter.type, null)}
+              key={filter.id}
+              onClick={() => handleFilterClick('main', filter.id)}
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300
+                ${activeFilters.main === filter.id 
+                  ? 'bg-amber-600 text-white transform scale-105 shadow-md' 
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
             >
-              <span>{filter.label}</span>
-              <X size={14} className="group-hover:scale-110 transition-transform" />
+              {filter.label}
             </button>
           ))}
         </div>
-      )}
-    </div>
-  );
-};
 
-const FilterDropdown = ({ label, options, value, onChange }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const dropdownRef = useRef(null);
+        <div className="flex items-center gap-4">
+          {/* Badge pour le nombre de filtres actifs */}
+          {activeFiltersCount > 0 && (
+            <button
+              onClick={handleResetFilters}
+              className="flex items-center gap-1 px-3 py-1 bg-amber-50 text-amber-600 rounded-full text-sm font-medium hover:bg-amber-100 transition-colors"
+            >
+              {activeFiltersCount} filtre{activeFiltersCount > 1 ? 's' : ''} actif{activeFiltersCount > 1 ? 's' : ''}
+              <X size={14} className="ml-1" />
+            </button>
+          )}
 
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setIsOpen(false);
-      }
-    };
+          <button
+            onClick={() => setShowFilters(!showFilters)}
+            className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-300
+              ${showFilters ? 'bg-amber-50 text-amber-600' : 'text-gray-600 hover:bg-gray-100'}`}
+          >
+            <SlidersHorizontal size={20} />
+            <span className="text-sm font-medium">Filtres</span>
+            <ChevronDown
+              size={16}
+              className={`transform transition-transform duration-300 ${showFilters ? 'rotate-180' : ''}`}
+            />
+          </button>
+        </div>
+      </div>
 
-    if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
+      {/* Filtres supplémentaires */}
+      {showFilters && (
+        <div className="p-4 space-y-6">
+          {/* Cuisine */}
+          <div>
+            <h3 className="text-sm font-medium text-gray-900 mb-3">Cuisine</h3>
+            <div className="flex flex-wrap gap-2">
+              {filters.cuisine.map(filter => (
+                <button
+                  key={filter.id}
+                  onClick={() => handleFilterClick('cuisine', filter.id)}
+                  className={`px-4 py-2 rounded-full text-sm transition-all duration-300
+                    ${activeFilters.cuisine === filter.id
+                      ? 'bg-amber-600 text-white transform scale-105 shadow-md border-transparent'
+                      : 'border border-gray-200 text-gray-600 hover:border-amber-600 hover:text-amber-600'}`}
+                >
+                  {filter.label}
+                </button>
+              ))}
+            </div>
+          </div>
 
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [isOpen]);
-
-  return (
-    <div className="relative" ref={dropdownRef}>
-      <button
-        type="button"
-        onClick={() => setIsOpen(!isOpen)}
-        className={`flex items-center gap-2 px-3 py-2 rounded-full border transition-all
-          ${value 
-            ? 'border-emerald-200 bg-emerald-50 text-emerald-600' 
-            : 'border-gray-200 hover:bg-gray-50 text-gray-700'}`}
-      >
-        <span className="text-sm font-medium whitespace-nowrap">{label}</span>
-        <ChevronDown 
-          size={16} 
-          className={`transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} 
-        />
-      </button>
-
-      {isOpen && (
-        <div 
-          style={{ 
-            backgroundColor: 'white',
-            borderRadius: '0.5rem',
-            boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-            border: '1px solid rgba(0, 0, 0, 0.1)',
-            maxWidth: '150px',
-            zIndex: 9999,
-            position: 'fixed',
-			      top: dropdownRef.current?.getBoundingClientRect().bottom + 8,
-      left: dropdownRef.current?.getBoundingClientRect().left,
-          }}
-        >
-          <div className="py-1">
-            {options.map((option) => (
-              <button
-                key={option.value}
-                type="button"
-                className={`w-full text-left px-4 py-2 text-sm transition-colors
-                  ${value === option.value 
-                    ? 'bg-emerald-50 text-emerald-600 font-medium' 
-                    : 'text-gray-700 hover:bg-gray-50'}`}
-                onClick={() => {
-                  onChange(option.value === value ? null : option.value, option.label);
-                  setIsOpen(false);
-                }}
-              >
-                {option.label}
-              </button>
-            ))}
+          {/* Prix */}
+          <div>
+            <h3 className="text-sm font-medium text-gray-900 mb-3">Prix</h3>
+            <div className="flex gap-2">
+              {filters.price.map(filter => (
+                <button
+                  key={filter.id}
+                  onClick={() => handleFilterClick('price', filter.id)}
+                  className={`px-4 py-2 rounded-full text-sm transition-all duration-300
+                    ${activeFilters.price === filter.id
+                      ? 'bg-amber-600 text-white transform scale-105 shadow-md border-transparent'
+                      : 'border border-gray-200 text-gray-600 hover:border-amber-600 hover:text-amber-600'}`}
+                >
+                  {filter.id} · {filter.label}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       )}

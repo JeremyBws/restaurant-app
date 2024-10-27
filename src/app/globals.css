@@ -106,3 +106,12 @@ body {
     display: none;
   }
 }
+
+.custom-toast {
+  @apply font-sans;
+}
+
+/* Animation des toasts */
+[data-sonner-toaster][data-theme='light'] {
+  --toast-icon-margin: 0.5rem;
+}

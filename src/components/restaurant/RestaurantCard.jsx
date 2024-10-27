@@ -1,75 +1,201 @@
-'use client';
-import { Card, CardContent } from '@/components/ui/card';
-import { Star, Users, Heart } from 'lucide-react';
-import { useFavorites } from '@/contexts/FavoritesContext';
-import { useAuth } from '@/contexts/AuthContext';
-import Image from 'next/image'; 
+import React, { useState } from 'react';
+import { Star, MapPin, Clock, Heart, Bookmark } from 'lucide-react';
+import Image from 'next/image';
+import useFavoritesStore from '@/store/favorites';
+import { toast } from 'sonner';
+import { motion, AnimatePresence } from 'framer-motion';
+const RestaurantCard = ({ 
+  id,
+  name, 
+  cuisine, 
+  address, 
+  rating, 
+  distance, 
+  price, 
+  image, 
+  openingHours,
+}) => {
+  const { 
+    favorites,
+    wishlist,
+    toggleFavorite,
+    toggleWishlist 
+  } = useFavoritesStore();
 
-const RestaurantCard = ({ id, name, image, address, rating, cuisine, price, openSpots, distance }) => {
-  const { isFavorite, toggleFavorite } = useFavorites();
-  const { user, openAuthModal } = useAuth();
+  const isFavorite = favorites.includes(id);
+  const isWishlisted = wishlist.includes(id);
+  const [isRatingHovered, setIsRatingHovered] = useState(false);
+  const [imageError, setImageError] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const handleFavoriteClick = (e) => {
-    e.preventDefault();
-    if (!user) {
-      openAuthModal('login');
-      return;
-    }
+  const handleFavoriteClick = () => {
+    const wasAlreadyFavorite = isFavorite;
     toggleFavorite(id);
+    
+    if (!wasAlreadyFavorite) {
+      toast.success('Ajouté aux favoris', {
+        description: name,
+        icon: '❤️',
+        duration: 2000,
+      });
+    } else {
+      toast.info('Retiré des favoris', {
+        description: name,
+        icon: '💔',
+        duration: 2000,
+      });
+    }
   };
 
+  const handleWishlistClick = () => {
+    const wasAlreadyWishlisted = isWishlisted;
+    toggleWishlist(id);
+    
+    if (!wasAlreadyWishlisted) {
+      toast.success('Ajouté à la wishlist', {
+        description: name,
+        icon: '🎯',
+        duration: 2000,
+      });
+    } else {
+      toast.info('Retiré de la wishlist', {
+        description: name,
+        icon: '🗑️',
+        duration: 2000,
+      });
+    }
+  };
+
+  // Fonction pour afficher le prix en symboles €
+  const getPriceSymbols = (price) => '€'.repeat(price.length);
+
+  // Fonction pour formater la distance
+  const formatDistance = (distance) => {
+    if (distance < 1) {
+      return `${(distance * 1000).toFixed(0)}m`;
+    }
+    return `${distance.toFixed(1)}km`;
+  };
+ const iconVariants = {
+    initial: { scale: 1 },
+    active: { 
+      scale: [1, 1.5, 1],
+      transition: { duration: 0.3 }
+    }
+  };
   return (
-    <Card className="overflow-hidden relative">
+    <div className="overflow-hidden group hover:shadow-lg transition-all duration-300 bg-white rounded-lg">
+      {/* Image container avec overlay et boutons */}
       <div className="relative h-48">
-   		<Image src={image} alt={name} width={400} height={250} layout="responsive" className="w-full h-full object-cover" />
-        {/* Agrandir la zone de clic du bouton favori */}
-        <button 
-          onClick={handleFavoriteClick}
-          className="absolute top-3 right-3 p-4 bg-white rounded-full shadow-lg transform transition-transform active:scale-95 touch-manipulation"
-          style={{ touchAction: 'manipulation' }}
+        <div className="relative w-full h-full">
+          {isLoading && (
+            <div className="absolute inset-0 bg-gray-100 animate-pulse" />
+          )}
+          
+          <Image
+            src={imageError ? '/images/restaurant-placeholder.jpg' : (image || '/images/restaurant-placeholder.jpg')}
+            alt={name}
+            fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            className={`object-cover transition-all duration-300 group-hover:scale-105 ${
+              isLoading ? 'opacity-0' : 'opacity-100'
+            }`}
+            onError={() => {
+              setImageError(true);
+              setIsLoading(false);
+            }}
+            onLoad={() => {
+              setIsLoading(false);
+            }}
+          />
+        </div>
+        
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        
+     {/* Actions container (favoris et wishlist) */}
+    <div className="absolute bottom-4 right-4 flex gap-2">
+      {/* Bouton Favoris */}
+      <motion.button
+        onClick={handleFavoriteClick}
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.95 }}
+        className={`p-2 rounded-full transition-colors duration-300
+          ${isFavorite 
+            ? 'bg-red-500 text-white' 
+            : 'bg-white/90 hover:bg-white text-gray-600 hover:text-red-500'}`}
+      >
+        <motion.div
+          animate={isFavorite ? "active" : "initial"}
+          variants={iconVariants}
         >
           <Heart 
-            size={24} // Augmenté de 20 à 24
-            className={`${
-              isFavorite(id) 
-                ? 'text-red-500 fill-red-500' 
-                : 'text-gray-600'
-            }`} 
+            className={`w-5 h-5 transition-colors duration-300 ${
+              isFavorite ? 'fill-current' : 'fill-transparent'
+            }`}
           />
-        </button>
-        {/* Note plus grande et plus visible */}
-        <div className="absolute top-3 left-3 bg-white px-4 py-2 rounded-lg flex items-center shadow-lg hover:scale-105 transition-transform">
-          <Star className="text-yellow-500 w-6 h-6" fill="#eab308" />
-          <span className="ml-2 font-semibold text-gray-500 text-base">{rating.toFixed(1)}</span>
-        </div>
+        </motion.div>
+      </motion.button>
+
+      {/* Bouton Wishlist */}
+      <motion.button
+        onClick={handleWishlistClick}
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.95 }}
+        className={`p-2 rounded-full transition-colors duration-300
+          ${isWishlisted 
+            ? 'bg-amber-500 text-white' 
+            : 'bg-white/90 hover:bg-white text-gray-600 hover:text-amber-500'}`}
+      >
+        <motion.div
+          animate={isWishlisted ? "active" : "initial"}
+          variants={iconVariants}
+        >
+          <Bookmark 
+            className={`w-5 h-5 transition-colors duration-300 ${
+              isWishlisted ? 'fill-current' : 'fill-transparent'
+            }`}
+          />
+        </motion.div>
+      </motion.button>
+    </div>
+
       </div>
 
-      {/* Contenu avec de plus grandes zones tactiles */}
-      <CardContent className="p-5">
-        <div className="flex justify-between items-start">
-          <h3 className="font-semibold text-lg text-gray-900 leading-tight">{name}</h3>
-          <span className="text-base text-gray-600 ml-2">{distance < 1 ? `${(distance * 1000).toFixed(0)}m` : `${distance.toFixed(1)}km`}</span>
-        </div>
-        
-        <p className="text-gray-600 text-base mt-2">{address}</p>
-        
-        <div className="mt-3 flex items-center gap-3 text-base text-gray-700">
-          <span>{cuisine}</span>
-          <span>•</span>
-          <span>{price}</span>
-        </div>
-        
-        <div className="mt-3 flex items-center text-base font-medium text-emerald-600">
-          <Users className="w-5 h-5 mr-2" />
-          <span>{openSpots} places disponibles</span>
+      {/* Contenu */}
+      <div className="p-4">
+        <div className="flex justify-between items-start mb-2">
+          <h3 className="text-lg font-semibold text-gray-900 group-hover:text-amber-600 transition-colors">
+            {name}
+          </h3>
+          <span className="text-amber-600 font-medium">
+            {getPriceSymbols(price)}
+          </span>
         </div>
 
-        {/* Bouton de réservation plus grand sur mobile */}
-        <button className="mt-4 w-full py-4 bg-emerald-600 text-white rounded-lg text-base font-medium hover:bg-emerald-700 transition-colors active:bg-emerald-800 touch-manipulation">
-          Réserver
-        </button>
-      </CardContent>
-    </Card>
+        <p className="text-sm text-gray-600 mb-3">{cuisine}</p>
+
+        <div className="space-y-2">
+          <div className="flex items-center gap-2 text-sm text-gray-500">
+            <MapPin className="w-4 h-4 min-w-4" />
+            <span className="truncate">{address}</span>
+          </div>
+          <div className="flex items-center gap-2 text-sm text-gray-500">
+            <Clock className="w-4 h-4 min-w-4" />
+            <span>{openingHours || "11:30 - 22:30"}</span>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="mt-4 pt-4 border-t border-gray-100 flex justify-between items-center">
+          <span className="text-sm text-gray-500">
+            {formatDistance(distance)}
+          </span>
+          <button className="px-6 py-2 bg-amber-600 text-white rounded-md hover:bg-amber-700 transform hover:scale-105 transition-all duration-300 text-sm font-medium hover:shadow-md active:scale-95">
+            Réserver
+          </button>
+        </div>
+      </div>
+    </div>
   );
 };
 

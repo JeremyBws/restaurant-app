@@ -1,21 +1,23 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useEffect } from 'react';
 import { MapPin } from 'lucide-react';
 import MapComponent from '@/components/map';
 import RestaurantCard from '@/components/restaurant/RestaurantCard';
 import FilterBar from '@/components/filters/FilterBar';
 import { restaurantsData } from '@/data/restaurants';
+import HeroSection from '@/components/HeroSection';
+import useFiltersStore from '@/store/filters';
 
 export default function Home() {
-  const [showMap, setShowMap] = useState(false);
-  const [filteredRestaurants, setFilteredRestaurants] = useState(restaurantsData);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [locationStatus, setLocationStatus] = useState('idle');
-  const [userLocation, setUserLocation] = useState(null);
+  const [showMap, setShowMap] = React.useState(false);
+  const [filteredRestaurants, setFilteredRestaurants] = React.useState(restaurantsData);
+  const [locationStatus, setLocationStatus] = React.useState('idle');
+  const [userLocation, setUserLocation] = React.useState(null);
 
-  // Gestion des filtres
-  const handleFilters = (type, value) => {
-    console.log('Filter/Sort:', type, value);
+  const { activeFilters, searchTerm } = useFiltersStore();
+
+  // Fonction pour appliquer les filtres
+  const applyFilters = React.useCallback(() => {
     let results = [...restaurantsData];
 
     // Appliquer la recherche si elle existe
@@ -27,112 +29,77 @@ export default function Home() {
       );
     }
 
-    // Appliquer les filtres selon le type
-    switch(type) {
-      case 'cuisine':
-        if (value) {
-          results = results.filter(r => r.cuisine === value);
-        }
-        break;
-      
-      case 'price':
-        if (value) {
-          results = results.filter(r => r.price === value);
-        }
-        break;
+    // Appliquer les filtres par catégorie
+    if (activeFilters.cuisine) {
+      results = results.filter(r => r.cuisine.toLowerCase() === activeFilters.cuisine.toLowerCase());
+    }
 
-      case 'sort':
-        switch (value) {
-          case 'distance':
-            results.sort((a, b) => a.distance - b.distance);
-            break;
-          case 'rating':
-            results.sort((a, b) => b.rating - a.rating);
-            break;
-          case 'price-asc':
-            results.sort((a, b) => a.price.length - b.price.length);
-            break;
-          case 'price-desc':
-            results.sort((a, b) => b.price.length - a.price.length);
-            break;
-        }
-        break;
+    if (activeFilters.price) {
+      results = results.filter(r => r.price === activeFilters.price);
+    }
 
-      case 'main':
-        switch (value) {
-          case 'proche':
-            results.sort((a, b) => a.distance - b.distance);
-            break;
-          case 'populaire':
-            results.sort((a, b) => b.rating - a.rating);
-            break;
-          // 'all' ne nécessite pas de traitement
-        }
-        break;
+    // Appliquer le tri principal
+    if (activeFilters.main) {
+      switch (activeFilters.main) {
+        case 'proche':
+          results.sort((a, b) => a.distance - b.distance);
+          break;
+        case 'populaire':
+          results.sort((a, b) => b.rating - a.rating);
+          break;
+      }
     }
 
     setFilteredRestaurants(results);
-  };
+  }, [activeFilters, searchTerm]);
 
-  // Gestion de la recherche
-  const handleSearch = (value) => {
-    setSearchTerm(value);
-    handleFilters('search', value); // Réutiliser la logique de filtrage
-  };
+  // Mettre à jour les résultats quand les filtres changent
+  useEffect(() => {
+    applyFilters();
+  }, [applyFilters, activeFilters, searchTerm]);
 
   return (
-    <div className="flex-1">
-      {/* Barre de recherche */}
-      <div className="p-4 bg-white border-b">
-        <div className="relative">
-          <MapPin className="absolute left-3 top-3 text-gray-400" size={20} />
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={(e) => handleSearch(e.target.value)}
-            placeholder="Rechercher un restaurant, une cuisine..."
-            className="w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-base font-medium"
-          />
-        </div>
-      </div>
+    <main className="min-h-screen">
+      <HeroSection />
 
-      {/* Barre de filtres */}
-      <FilterBar onFilterChange={handleFilters} />
-
-      {/* Toggle Vue Liste/Carte */}
-      <div className="bg-white border-b px-4 py-2 flex justify-between items-center sticky top-[60px] z-40">
-        <div className="text-sm text-gray-600">
-          {filteredRestaurants.length} restaurants trouvés
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="mb-6">
+          <FilterBar onFiltersChange={applyFilters} />
         </div>
-        <div className="flex gap-2">
-          <button 
-            onClick={() => setShowMap(false)}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors
-              ${!showMap ? 'bg-emerald-100 text-emerald-600' : 'hover:bg-gray-100 text-gray-600'}`}
-          >
-            Liste
-          </button>
-          <button 
-            onClick={() => setShowMap(true)}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors
-              ${showMap ? 'bg-emerald-100 text-emerald-600' : 'hover:bg-gray-100 text-gray-600'}`}
-          >
-            Carte
-          </button>
-        </div>
-      </div>
 
-      {/* Contenu principal */}
-      <main className="flex-1">
+        {/* Toggle Vue Liste/Carte */}
+        <div className="bg-white rounded-lg shadow-sm mb-6 px-4 py-3 flex justify-between items-center">
+          <div className="text-sm text-gray-600">
+            {filteredRestaurants.length} restaurant{filteredRestaurants.length > 1 ? 's' : ''} trouvé{filteredRestaurants.length > 1 ? 's' : ''}
+          </div>
+          <div className="flex gap-2">
+            <button 
+              onClick={() => setShowMap(false)}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors
+                ${!showMap ? 'bg-amber-100 text-amber-600' : 'hover:bg-gray-100 text-gray-600'}`}
+            >
+              Liste
+            </button>
+            <button 
+              onClick={() => setShowMap(true)}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors
+                ${showMap ? 'bg-amber-100 text-amber-600' : 'hover:bg-gray-100 text-gray-600'}`}
+            >
+              Carte
+            </button>
+          </div>
+        </div>
+
+        {/* Contenu principal */}
         {showMap ? (
-          <div className="h-[calc(100vh-180px)]">
+          <div className="h-[600px] rounded-lg overflow-hidden shadow-lg">
             <MapComponent 
               restaurants={filteredRestaurants}
               userLocation={userLocation}
             />
           </div>
         ) : (
-          <div className="max-w-xl mx-auto p-4 space-y-4 pb-20">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredRestaurants.length > 0 ? (
               filteredRestaurants.map(restaurant => (
                 <RestaurantCard
@@ -141,13 +108,19 @@ export default function Home() {
                 />
               ))
             ) : (
-              <div className="text-center py-8 text-gray-500">
-                Aucun restaurant ne correspond à vos critères
+              <div className="col-span-full text-center py-12">
+                <p className="text-gray-500 text-lg">Aucun restaurant ne correspond à vos critères</p>
+                <button
+                  onClick={() => useFiltersStore.getState().resetFilters()}
+                  className="mt-4 text-amber-600 hover:text-amber-700 font-medium"
+                >
+                  Réinitialiser les filtres
+                </button>
               </div>
             )}
           </div>
         )}
-      </main>
-    </div>
+      </div>
+    </main>
   );
 }

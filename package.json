@@ -10,15 +10,18 @@
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.1.0",
+    "@radix-ui/react-toast": "^1.2.2",
     "@react-google-maps/api": "^2.20.3",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
+    "framer-motion": "^11.11.10",
     "lucide-react": "^0.453.0",
-	  "next": "latest",
-  "react": "latest",
-  "react-dom": "latest",
- 
-    "tailwind-merge": "^2.5.4"
+    "next": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "sonner": "^1.5.0",
+    "tailwind-merge": "^2.5.4",
+    "zustand": "^5.0.0"
   },
   "devDependencies": {
     "eslint": "^8",
