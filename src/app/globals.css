@@ -57,3 +57,52 @@ body {
     background: #555;
   }
 }
+/* Amélioration du scroll sur iOS */
+@supports (-webkit-overflow-scrolling: touch) {
+  body {
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Désactiver le pull-to-refresh sur mobile */
+body {
+  overscroll-behavior-y: none;
+}
+
+/* Optimisation des interactions tactiles */
+* {
+  touch-action: manipulation;
+}
+
+/* Amélioration du scroll horizontal pour les filtres */
+.scroll-smooth {
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Masquer la scrollbar tout en gardant la fonctionnalité */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+@layer utilities {
+  .transition-gpu {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    perspective: 1000px;
+  }
+  
+  .will-change-transform {
+    will-change: transform;
+  }
+   .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}

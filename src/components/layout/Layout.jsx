@@ -79,9 +79,12 @@ const { user, logout, openAuthModal } = useAuth();
   <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg mb-4">
     <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center">
       {user ? (
-        <image 
+        <Image 
           src={user.avatar || '/placeholder-avatar.png'} 
           alt={user.name}
+		  width={12}
+		height={12}
+		layout="responsive"
           className="w-full h-full rounded-full object-cover"
         />
       ) : (
