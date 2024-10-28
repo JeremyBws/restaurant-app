@@ -226,7 +226,7 @@ const ProfilePage = () => {
 
             {/* Centres d'intérêt */}
             <div>
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Centres d'intérêt</h3>
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Centres d&apos;intérêt</h3>
               <div className="flex flex-wrap gap-2">
                 {preferences?.interests?.map((interest) => (
                   <span

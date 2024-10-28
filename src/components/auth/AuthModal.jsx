@@ -194,7 +194,7 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'login' }) => {
                     onClick={() => setMode('register')}
                     className="text-amber-600 hover:text-amber-700 font-medium"
                   >
-                    S'inscrire
+                    S&apos;inscrire
                   </button>
                 </>
               ) : (
