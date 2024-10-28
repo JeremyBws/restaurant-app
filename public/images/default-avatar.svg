@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+  <!-- Background -->
+  <defs>
+    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f97316;stop-opacity:0.2" />
+      <stop offset="100%" style="stop-color:#f97316;stop-opacity:0.1" />
+    </linearGradient>
+  </defs>
+  <rect width="400" height="400" fill="url(#grad1)" />
+  
+  <!-- Avatar shape -->
+  <circle cx="200" cy="150" r="70" fill="#f97316" opacity="0.2" />
+  <path d="M200,250 C117,250 50,320 50,400 L350,400 C350,320 283,250 200,250" fill="#f97316" opacity="0.2" />
+</svg>
